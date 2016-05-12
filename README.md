@@ -1,17 +1,17 @@
 Terminal
---------
+========
 
 This script (`terminal.py`) allows you to open a new terminal window to execute
 some commands in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
 
-When I am using some gui editor (atom, gvim/macvim/local vim, sublime, gedit) to write source code, I wish to open a new terminal window to execute it instead of running and output result in the bottom panel (no interactive) or stop the editor to wait for my program. 
+When I am using some gui editor (atom, gvim/macvim/local vim, sublime, gedit) to write source code, I wish to open a new terminal window to execute it instead of running and output result in the bottom panel (sublime/atom/gedit always executes external programs in bottom panel with no interactive shell) or stop the editor to wait for my program. 
 
 Opening a new terminal window to execute commands in different operating systems is a tricky thing: arguments must be carefully escaped and passed in correct way, intermediate script (shell script, AppleScript or batch script) must be carefully generated and passed through pipe, and different terminal in all systems must be invoked in different methods.
 
-So `terminal.py` is created to do these dirty stuff altogether in a single script file and provide a unique interface under different operating systems.
+So `terminal.py` is created to do these dirty stuff altogether in a single script file and provide a unique interface under different operating systems. Calling it in your favorite editor to open a new window and execute your programs just like debugging a command line application in visual studio.
 
 Features
---------
+========
 
 - Open a new cmd window to execute commands in Windows
 - Open a new Terminal/iTerm window to execute commands in Mac OS X
@@ -29,7 +29,7 @@ Features
 - Set the title of the terminal window (not available in some terminal)
 
 Manual
-------
+======
 
 ```text
 $ python terminal.py
@@ -53,7 +53,7 @@ Options:
 ```
 
 Windows 
-=======
+-------
 
 Open a new cmd window to execute command:
 
@@ -79,7 +79,7 @@ Open a new cmd window and execute commands which is passed from stdin:
 	^Z
 	
 Linux (ubuntu)
-==============
+--------------
 
 Open a new window (xterm by default) to execute command:
 
@@ -105,7 +105,7 @@ Open a new gnome-terminal and execute commands which is passed from stdin:
 	^D
 
 Mac OS X
-========
+--------
 
 Open a new Terminal window to execute command:
 
@@ -142,7 +142,7 @@ to avoid closing window manually after exists.
 You can use Terminal or iTerm2 in Mac OS X as you like.
 	
 Calling Cygwin from win32
-=========================
+-------------------------
 
 Open cygwin bash window in win32:
 
@@ -157,7 +157,7 @@ Open cygwin mintty window in win32 from given working directory:
 	python terminal.py --wait -c c:\cygwin -m mintty -d d:\ ls -la
 	
 Inside Cygwin
-=============
+-------------
 
 Open cmd window to run win32 command from cygwin:
 
