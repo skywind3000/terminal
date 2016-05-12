@@ -1,8 +1,7 @@
 # Terminal
 
 This script (`terminal.py`) allows you to open a new terminal window to execute
-some command in Windows, Cygwin, Ubuntu and OS X. After executing it will wait and
-prompt you "press any key to quit" (optional).
+some command in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
 
 When I am using some gui editor (atom, gvim/macvim/local vim, sublime, gedit) to debug my program, I wish to open a new terminal window to execute it instead of running and output result in the bottom panel (no interactive) or stop the editor to wait for my program. 
 
