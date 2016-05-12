@@ -1,4 +1,4 @@
-# Terminal
+# Terminal
 
 This script (`terminal.py`) allows you to open a new terminal window to execute
 some command in Windows, Cygwin, Ubuntu and OS X. After executing it will wait and
