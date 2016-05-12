@@ -1,4 +1,5 @@
-# Terminal
+Terminal
+--------
 
 This script (`terminal.py`) allows you to open a new terminal window to execute
 some commands in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
@@ -9,7 +10,8 @@ Opening a new terminal window to execute commands in different operating systems
 
 So `terminal.py` is created to do these dirty stuff altogether in a single script file and provide a unique interface under different operating systems.
 
-# Features
+Features
+--------
 
 - Open a new cmd window to execute commands in Windows
 - Open a new Terminal/iTerm window to execute commands in Mac OS X
@@ -26,7 +28,8 @@ So `terminal.py` is created to do these dirty stuff altogether in a single scrip
 - Set terminal profile (only enabled in Terminal/iTerm/gnome-terminal)
 - Set the title of the terminal window (not available in some terminal)
 
-# Usage
+Manual
+------
 
 ```text
 $ python terminal.py
@@ -49,7 +52,8 @@ Options:
   -s, --stdin           read commands from stdin 
 ```
 
-# Windows 
+Windows 
+=======
 
 Open a new cmd window to execute command:
 
@@ -74,7 +78,8 @@ Open a new cmd window and execute commands which is passed from stdin:
 	echo Hello from a new cmd window !!
 	^Z
 	
-# Linux (ubuntu)
+Linux (ubuntu)
+==============
 
 Open a new window (xterm by default) to execute command:
 
@@ -99,7 +104,8 @@ Open a new gnome-terminal and execute commands which is passed from stdin:
 	echo "Hello from a new gnome-terminal"
 	^D
 
-# Mac OS X
+Mac OS X
+========
 
 Open a new Terminal window to execute command:
 
@@ -135,7 +141,8 @@ to avoid closing window manually after exists.
 
 You can use Terminal or iTerm2 in Mac OS X as you like.
 	
-# Calling Cygwin from win32
+Calling Cygwin from win32
+=========================
 
 Open cygwin bash window in win32:
 
@@ -149,7 +156,8 @@ Open cygwin mintty window in win32 from given working directory:
 
 	python terminal.py --wait -c c:\cygwin -m mintty -d d:\ ls -la
 	
-# Inside Cygwin
+Inside Cygwin
+=============
 
 Open cmd window to run win32 command from cygwin:
 
