@@ -536,7 +536,7 @@ class Terminal (object):
 
 	def __darwin_open_terminal (self, terminal, title, script, profile):
 		if terminal in ('', 'system', 'default'):
-			if not profile:
+			if (not profile) and (not title):
 				self.config.darwin_open_system(title, script, profile)
 			else:
 				self.config.darwin_open_terminal(title, script, profile)

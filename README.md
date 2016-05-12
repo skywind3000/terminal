@@ -1,7 +1,7 @@
 # Terminal
 
 This script (`terminal.py`) allows you to open a new terminal window to execute
-some command in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
+some commands in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
 
 When I am using some gui editor (atom, gvim/macvim/local vim, sublime, gedit) to write source code, I wish to open a new terminal window to execute it instead of running and output result in the bottom panel (no interactive) or stop the editor to wait for my program. 
 
@@ -62,6 +62,10 @@ Open a new cmd window to execute command and pause after finish:
 Open a new cmd window and set title:
     
 	python terminal.py --wait -t mytitle d:\hello.exe 
+
+Open a new cmd window to execute command in a given working directory:
+
+	python terminal.py --wait -d d:\ dir
 	
 Open a new cmd window and execute commands which is passed from stdin:
 
@@ -84,6 +88,10 @@ Open gnome-terminal in given profile (create a new profile in gnome-terminal's s
 
 	python terminal.py -m gnome-terminal -p myprofile --wait ls -la
 	
+Open a new window to execute command in a given working directory:
+
+	python terminal.py --wait -d /tmp ls -la
+	
 Open a new gnome-terminal and execute commands which is passed from stdin:
 
 	python terminal.py --wait -m gnome-terminal --stdin
@@ -101,6 +109,10 @@ Open Terminal in given profile (create a new profile in Terminal's preferences):
 
 	python terminal.py --wait -p DevelopProfile ls -la
 	
+Open a new window to execute command in a given working directory:
+
+	python terminal.py --wait -d /tmp ls -la
+	
 Open Terminal and execute commands which is passed from stdin:
 
 	python terminal.py --wait --stdin
@@ -111,5 +123,44 @@ Open Terminal and execute commands which is passed from stdin:
 Open iTerm and execute command:
 
 	python terminal.py --wait -m iterm ls -la
+	
+Open Terminal window in a given profile and activate MacVim after exit:
+
+	python terminal.py --wait -o "open /Applications/MacVim.app" -p myprofile ls -la
+	
+This is very useful when you are executing terminal.py inside MacVim, because after 
+terminal window closed OS X will not bring MacVim to the front. And you need a new 
+terminal profile because you can enable "Close window when shell exists" in myprofile 
+to avoid closing window manually after exists.
+
+You can use both Terminal and iTerm2 in Mac OS X as you like.
+	
+# Calling Cygwin from win32
+
+Open cygwin bash window in win32:
+
+	python terminal.py --wait -c c:\cygwin -m bash ls -la
+	
+Open cygwin mintty window in win32:
+
+	python terminal.py --wait -c c:\cygwin -m mintty ls -la
+	
+Open cygwin mintty window in win32 from given working directory:
+
+	python terminal.py --wait -c c:\cygwin -m mintty -d d:\ ls -la
+	
+# Inside Cygwin
+
+Open cmd window to run win32 command from cygwin:
+
+	python terminal.py --wait -m cmd dir
+	
+Open mintty window to run cygwin shell command from cygwin:
+
+	python terminal.py --wait -m mintty ls -la
+	
+Open bash window to run cygwin shell command from cygwin:
+
+	python terminal.py --wait -m bash ls -la
 	
 
