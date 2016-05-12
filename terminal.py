@@ -566,7 +566,7 @@ class Terminal (object):
 			terminal = ''
 		if sys.platform[:3] == 'win':
 			if script == None:
-				return ('cmd (default)', 'cygwin', 'cygwin-mintty')
+				return ('cmd (default)', 'cygwin', 'mintty', 'cygwinx')
 			return self.__win32_open_terminal(terminal, title, script, profile)
 		elif sys.platform == 'cygwin':
 			if script == None:

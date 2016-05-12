@@ -141,8 +141,8 @@ to avoid closing window manually after exists.
 
 You can use Terminal or iTerm2 in Mac OS X as you like.
 	
-Calling Cygwin from win32
--------------------------
+Run Cygwin commands from Win32
+------------------------------
 
 Open cygwin bash window in win32:
 
@@ -151,6 +151,10 @@ Open cygwin bash window in win32:
 Open cygwin mintty window in win32:
 
 	python terminal.py --wait -c c:\cygwin -m mintty ls -la
+
+Run cygwin commands in the same terminal without creating a new window by using `cygwinx` option:
+
+	python terminal.py -c c:\cygwin -m cygwinx ls -la
 	
 Open cygwin mintty window in win32 from given working directory:
 
