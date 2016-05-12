@@ -133,7 +133,7 @@ terminal window closed OS X will not bring MacVim to the front. And you need a n
 terminal profile because you can enable "Close window when shell exists" in myprofile 
 to avoid closing window manually after exists.
 
-You can use both Terminal and iTerm2 in Mac OS X as you like.
+You can use Terminal or iTerm2 in Mac OS X as you like.
 	
 # Calling Cygwin from win32
 
