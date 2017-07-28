@@ -648,9 +648,6 @@ class configure (object):
 				os.system(command)
 			else:
 				args = [bash, '--login', self.win2wsl(t.name)]
-				code, stdout, stderr = self.call(args)
-				sys.stdout.write(stdout)
-				sys.stdout.flush()
 				p = subprocess.Popen(
 						args,
 						shell = False, 
