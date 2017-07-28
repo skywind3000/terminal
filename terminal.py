@@ -461,7 +461,7 @@ class configure (object):
 		script = [ n for n in script ]
 		script.insert(0, 'cd %s'%self.unix_escape(os.getcwd()))
 		self.cygwin_write_script(scriptname, script)
-		command = ['cygstart', 'bash']
+		command = ['cygstart', self.cyg2win('/bin/bash')]
 		if profile == 'login':
 			command.append('--login')
 		self.call(command + ['-i', scriptname])
@@ -473,7 +473,8 @@ class configure (object):
 		script = [ n for n in script ]
 		script.insert(0, 'cd %s'%self.unix_escape(os.getcwd()))
 		self.cygwin_write_script(scriptname, script)
-		command = ['cygstart', 'mintty']
+		command = ['cygstart']
+		command += [self.cyg2win('/bin/mintty')]
 		# if  title:
 			# command += ['-t', title]
 		if os.path.exists('/Cygwin-Terminal.ico'):
@@ -499,10 +500,10 @@ class configure (object):
 			return path
 		if not path.startswith('/'):
 			raise Exception('cannot convert path: %s'%path)
-		if not self.cygwin:
-			raise Exception('cannot find cygwin root')
 		if sys.platform == 'cygwin':
 			return self.cygwin_win_path(path)
+		if not self.cygwin:
+			raise Exception('cannot find cygwin root')
 		return os.path.abspath(os.path.join(self.cygwin, path[1:]))
 
 	# convert windows path to wsl path
