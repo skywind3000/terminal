@@ -4,9 +4,7 @@ Terminal
 This script (`terminal.py`) allows you to open a new terminal window and execute
 some commands on Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
 
-Programming in desktop text editors (atom, gvim, sublime and gedit) requires executing your code in a new interactive shell window.
-
-But a lot of editors have not such feature, the only thing they can do is executing commands in their bottom panel, or in a silent background job.
+Programming in desktop text editors (atom, gvim, sublime and gedit) always requires executing your code in a new interactive shell window. But a lot of editors is lack of such feature, the only thing they can do is executing shell commands in their bottom panel, or in a silent background job.
 
 Opening a new terminal window to execute commands in different operating systems is a tricky thing: arguments must be carefully escaped and passed in the correct way, intermediate script (shell script, AppleScript or batch script) must be carefully generated and passed through pipe, and different terminal in all systems must be invoked in different methods.
 
