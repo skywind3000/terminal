@@ -566,7 +566,9 @@ class configure (object):
 		command = [bash]
 		if login:
 			command.append('--login')
-		command.extend(['-i', '/tmp/' + filename])
+		if sys.stdout.isatty():
+			command.extend(['-i'])
+		command.extend(['/tmp/' + filename])
 		subprocess.call(command, shell = False)
 		return 0
 
@@ -640,9 +642,30 @@ class configure (object):
 				t.write('%s\n'%line)
 			t.close()
 			tmpname = t.name
-			command = '%s '%bash
-			command += '--login -i "' + self.win2wsl(t.name) + '"'
-			os.system(command)
+			if sys.stdout.isatty():
+				command = '%s '%bash
+				command += '--login -i "' + self.win2wsl(t.name) + '"'
+				os.system(command)
+			else:
+				args = [bash, '--login', self.win2wsl(t.name)]
+				code, stdout, stderr = self.call(args)
+				sys.stdout.write(stdout)
+				sys.stdout.flush()
+				p = subprocess.Popen(
+						args,
+						shell = False, 
+						stdin = subprocess.PIPE,
+						stderr = subprocess.STDOUT,
+						stdout = subprocess.PIPE)
+				stdout = p.stdout
+				p.stdin.close()
+				while True:
+					text = stdout.readline()
+					if text == '':
+						break
+					text = text.rstrip('\n\r')
+					sys.stdout.write(text + '\n')
+					sys.stdout.flush()
 			try:
 				os.remove(t.name)
 			except:
