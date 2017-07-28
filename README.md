@@ -2,13 +2,17 @@ Terminal
 ========
 
 This script (`terminal.py`) allows you to open a new terminal window and execute
-some commands in Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
+some commands on Windows, Cygwin, Ubuntu and OS X. And prompts you "press any key to continue ..." before exit.
 
-When I am using some gui editor (atom, gvim/macvim/local vim, sublime, gedit) to write source code, I wish to open a new terminal window to execute it instead of running and output result in the bottom panel (sublime/atom/gedit always executes external programs in bottom panel with no interactive shell) or stop the editor to wait for my program exit (which vim/gvim does).
+Programming in desktop text editors (atom, gvim, sublime and gedit) requires executing your code in a new interactive shell window.
 
-Opening a new terminal window to execute commands in different operating systems is a tricky thing: arguments must be carefully escaped and passed in correct way, intermediate script (shell script, AppleScript or batch script) must be carefully generated and passed through pipe, and different terminal in all systems must be invoked in different methods.
+But a lot of editors have not such feature, the only thing they can do is executing commands in their bottom panel, or in a silent background job.
 
-So `terminal.py` is created to do these dirty stuff altogether in a single script file and provide a unique interface under different operating systems. Calling it in your favorite editor to open a new window and execute your programs just like debugging a command line application in visual studio.
+Opening a new terminal window to execute commands in different operating systems is a tricky thing: arguments must be carefully escaped and passed in the correct way, intermediate script (shell script, AppleScript or batch script) must be carefully generated and passed through pipe, and different terminal in all systems must be invoked in different methods.
+
+Therefor, `terminal.py` is created to get these dirty stuff down, in a single script file and provide a unique interface for different operating systems. 
+
+Calling it in your favorite editor to open a new window and execute your programs just like running a command line application in visual studio.
 
 Features
 ========
@@ -197,3 +201,8 @@ Run linux commands in the current windows shell window:
 
 	python terminal -m wslx ls -la
 
+
+Credit
+======
+
+......
