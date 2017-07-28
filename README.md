@@ -13,20 +13,30 @@ So `terminal.py` is created to do these dirty stuff altogether in a single scrip
 Features
 ========
 
-- Open a new cmd window to execute commands in Windows
-- Open a new Terminal/iTerm window to execute commands in Mac OS X
-- Open a new xterm window to execute commands in Mac os x (require xquartz)
-- Open a new xterm/gnome-terminal window to execute commands in Linux desktop
-- Read commands from both arguments or stdin
-- Open a cygwin bash/mintty window to execute commands in Windows (outside cygwin)
-- Using cygwin bash to execute commands (without creating a new window) in Windows
-- Open a new bash/mintty window to execute commands inside cygwin
-- Open a new cmd window to execute windows batch command inside cygwin
-- Using cmd to execute windows bash commands (without new window) inside cygwin
-- After commands finished, prompts user to press any key to quit (optional)
-- Run some other commands before quit (after waiting user pressing key)
-- Set terminal profile (only enabled in Terminal/iTerm/gnome-terminal)
-- Set the title of the terminal window (not available in some terminal)
+- **Windows**:
+	- Open a new `cmd` window to execute Windows commands.
+	- Open a new `cygwin` bash/mintty window to execute Cygwin commands.
+	- Run `cygwin` commands directly in the current Windows shell (without open a new window).
+	- Open a new `WSL` (Windows Subsystem for Linux) bash window to execute linux commands.
+	- Run `WSL` bash commands directly in the current Windows shell (without open a new window).
+- **Cygwin**:
+	- Open a new cygwin `bash` window to execute cygwin commands.
+	- Open a new cygwin `mintty` window to execute cygwin commands.
+	- Open a new `cmd` window to execute Windows commands.
+- **Linux / Ubuntu**:
+	- Open a new `xterm` window to execute commands on Linux Desktop.
+	- Open a new `gnome-terminal` window to execute commands on Linux Desktop.
+- **Mac OS X**:
+	- Open a new `Terminal` window to execute commands in Mac OS X
+	- Open a new `iTerm2` window to execute commands in Mac OS X
+	- Open a new `xterm` window to execute commands in Mac os x (require xquartz)
+- **Misc**:
+	- After commands finished, prompts user to **press any key to quit** (optional).
+	- Specify initial working directory (optional).
+	- Read commands from both arguments or stdin.
+	- Run some other commands before quit (after waiting user pressing key).
+	- Set terminal profile (only enabled in Terminal/iTerm/gnome-terminal).
+	- Set the title of the terminal window (not available in some terminal).
 
 Manual
 ======
@@ -77,7 +87,7 @@ Open a new cmd window and execute commands which is passed from stdin:
 	dir c:\
 	echo Hello from a new cmd window !!
 	^Z
-	
+
 Linux (ubuntu)
 --------------
 
@@ -175,4 +185,15 @@ Open bash window to run cygwin shell command from cygwin:
 
 	python terminal.py --wait -m bash ls -la
 	
+
+Run WSL Linux commands on Windows
+---------------------------------
+
+Open a new bash window to run linux commands:
+
+	python terminal --wait -m wsl ls -la
+
+Run linux commands in the current windows shell window:
+
+	python terminal -m wslx ls -la
 
