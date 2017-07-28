@@ -33,6 +33,11 @@ class configure (object):
 		self.temp = os.path.join(self.temp, 'winex_%02d.cmd'%self.tick)
 		self.cygwin = ''
 		self.GetShortPathName = None
+		self.GetFullPathName = None
+		self.GetLongPathName = None
+		self.ShellExecute = None
+		self.kernel32 = None
+		self.textdata = None
 	
 	def call (self, args, stdin = None):
 		p = subprocess.Popen(args, shell = False,
@@ -188,29 +193,120 @@ class configure (object):
 		output += '"'
 		return output
 
+	def _win32_load_kernel (self):
+		if self.unix:
+			return False
+		import ctypes
+		if not self.kernel32:
+			self.kernel32 = ctypes.windll.LoadLibrary("kernel32.dll")
+		if not self.textdata:
+			self.textdata = ctypes.create_string_buffer('0' * 2048)
+		ctypes.memset(self.textdata, 0, 2048)
+		return True
+
 	def win32_path_short (self, path):
+		if not path:
+			return ''
 		path = os.path.abspath(path)
 		if self.unix:
 			return path
+		self._win32_load_kernel()
 		if not self.GetShortPathName:
-			self.kernel32 = None
-			self.textdata = None
 			try:
 				import ctypes
-				self.kernel32 = ctypes.windll.LoadLibrary("kernel32.dll")
-				self.textdata = ctypes.create_string_buffer('\000' * 1024)
 				self.GetShortPathName = self.kernel32.GetShortPathNameA
-				args = [ ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int ]
+				args = [ ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int32 ]
 				self.GetShortPathName.argtypes = args
 				self.GetShortPathName.restype = ctypes.c_uint32
 			except: pass
 		if not self.GetShortPathName:
 			return path
-		retval = self.GetShortPathName(path, self.textdata, 1024)
+		retval = self.GetShortPathName(path, self.textdata, 2048)
 		shortpath = self.textdata.value
 		if retval <= 0:
+			import ctypes
+			print 'ERROR(%d): %s'%(ctypes.GetLastError(), path)
 			return ''
 		return shortpath
+
+	def win32_path_full (self, path):
+		if not path:
+			return ''
+		path = os.path.abspath(path)
+		if self.unix:
+			return path
+		self._win32_load_kernel()
+		if not self.GetFullPathName:
+			try:
+				import ctypes
+				self.GetFullPathName = self.kernel32.GetFullPathNameA
+				args = [ ctypes.c_char_p, ctypes.c_int32, ctypes.c_char_p ]
+				self.GetFullPathName.argtypes = arg + [ctypes.c_char_p]
+				self.GetFullPathName.restype = ctypes.c_uint32
+			except: pass
+		if not self.GetFullPathName:
+			return path
+		retval = self.GetFullPathName(path, 2048, self.textdata, None)
+		fullpath = self.textdata.value
+		if retval <= 0:
+			return ''
+		return fullpath
+
+	# win32 get long pathname
+	def win32_path_long (self, path):
+		if not path:
+			return ''
+		path = os.path.abspath(path)
+		if self.unix:
+			return path
+		self._win32_load_kernel()
+		if not self.GetLongPathName:
+			try:
+				import ctypes
+				self.GetLongPathName = self.kernel32.GetLongPathNameA
+				args = [ ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int32 ]
+				self.GetLongPathName.argtypes = arg
+				self.GetLongPathName.restype = ctypes.c_uint32
+			except: pass
+		if not self.GetLongPathName:
+			return path
+		retval = self.GetLongPathName(path, self.textdata, 2048)
+		longpath = self.textdata.value
+		if retval <= 0:
+			return ''
+		return longpath
+
+	def win32_shell_execute (self, op, filename, parameters, cwd = None):
+		if self.unix:
+			return False
+		if not cwd:
+			cwd = os.getcwd()
+		self._win32_load_kernel()
+		if not self.ShellExecute:
+			try:
+				import ctypes
+				self.shell32 = ctypes.windll.LoadLibrary('shell32.dll')
+				self.ShellExecute = self.shell32.ShellExecuteA
+				args = [ ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p ]
+				args+= [ ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int32 ]
+				self.ShellExecute.argtypes = args
+				self.ShellExecute.restype = ctypes.wintypes.HINSTANCE
+			except: pass
+		if not self.ShellExecute:
+			return False
+		nShowCmd = 5
+		self.ShellExecute(None, op, filename, parameters, cwd, nShowCmd)
+		return True
+	
+	# win32 correct casing path: c:/windows -> C:\Windows
+	def win32_path_casing (self, path):
+		if not path:
+			return ''
+		path = os.path.abspath(path)
+		if self.unix:
+			return path
+		path = path[:1].upper() + path[1:]
+		return self.win32_path_long(self.win32_path_short(path))
 
 	# start cmd.exe in a new window and execute script
 	def win32_open_console (self, title, script, profile = None):
@@ -225,7 +321,53 @@ class configure (object):
 		pathname = self.win32_path_short(self.temp)
 		os.system('start cmd /C %s'%(pathname))
 		return 0
-	
+
+	# search bash for windows available ?
+	def win32_wsl_locate (self):
+		if not self.win32_detect_win10():
+			return None
+		root = os.environ.get('SystemRoot', None)
+		if not root:
+			return None
+		system32 = os.path.join(root, 'System32')
+		bash = os.path.join(system32, 'bash.exe')
+		if os.path.exists(bash):
+			return bash
+		system32 = os.path.join(root, 'SysNative')
+		bash = os.path.join(system32, 'bash.exe')
+		if os.path.exists(bash):
+			return bash
+		return None
+
+	def win32_reg_read (self, keyname, path):
+		try:
+			import _winreg
+			mode = _winreg.KEY_READ | _winreg.KEY_WOW64_64KEY
+			key = _winreg.OpenKey(keyname, path, 0, mode)
+			count = _winreg.QueryInfoKey(key)[0]
+		except:
+			return None
+		data = {}
+		for i in range(count):
+			try:
+				name, value, tt = _winreg.EnumValue(key, i)
+			except OSError as e:
+				break
+			data[name] = (tt, value) 
+		return data
+
+	def win32_detect_win10 (self):
+		try:
+			import _winreg
+			path = r'SOFTWARE\Microsoft\Windows NT\CurrentVersion'
+			data = self.win32_reg_read(_winreg.HKEY_LOCAL_MACHINE, path)
+		except:
+			return False
+		version = data.get('CurrentMajorVersionNumber', (0, 0))
+		if version[1] >= 10:
+			return True
+		return False
+
 	def darwin_open_xterm (self, title, script, profile = None):
 		command = []
 		for line in script:
@@ -362,6 +504,16 @@ class configure (object):
 		if sys.platform == 'cygwin':
 			return self.cygwin_win_path(path)
 		return os.path.abspath(os.path.join(self.cygwin, path[1:]))
+
+	# convert windows path to wsl path
+	def win2wsl (self, path):
+		save = path
+		path = self.win32_path_casing(path)
+		if not path:
+			return ''
+		if len(path) < 3:
+			return ''
+		return '/mnt/%s%s'%(path[0].lower(), path[2:].replace('\\', '/'))
 	
 	# use bash in cygwin to execute script and return output
 	def win32_cygwin_execute (self, script, login = False):
@@ -473,6 +625,45 @@ class configure (object):
 		os.system(command)
 		return 0
 
+	# open bash for windows (needs windows 10) and execute script
+	def win32_wsl_now (self, title, script, profile = None):
+		bash = self.win32_wsl_locate()
+		if not bash:
+			return -1, None
+		from tempfile import NamedTemporaryFile as OpenTmp
+		with OpenTmp(prefix = 'bash_', suffix = '.sh', delete = False) as t:
+			t.write('#! /bin/bash\n')
+			path = self.win2wsl(os.getcwd())
+			t.write('cd %s\n'%self.unix_escape(path))
+			for line in script:
+				t.write('%s\n'%line)
+			t.close()
+			tmpname = t.name
+			command = '%s '%bash
+			command += '--login -i "' + self.win2wsl(t.name) + '"'
+			os.system(command)
+			try:
+				os.remove(t.name)
+			except:
+				pass
+		return 0
+
+	# open bash for windows in a new terminal window
+	def win32_wsl_open_bash (self, title, script, profile = None):
+		bash = self.win32_wsl_locate()
+		if not bash:
+			return -1, None
+		fp = open(self.temp, 'wb')
+		fp.write('#! /bin/bash\n')
+		path = self.win2wsl(os.getcwd())
+		fp.write('cd %s\n'%self.unix_escape(path))
+		for line in script:
+			fp.write('%s\n'%line)
+		fp.close()
+		command = '--login -i "' + self.win2wsl(self.temp) + '"'
+		self.win32_shell_execute('open', bash, command, os.getcwd())
+		return 0
+
 
 #----------------------------------------------------------------------
 # die
@@ -515,6 +706,17 @@ class Terminal (object):
 				self.config.win32_cygwin_now(script, True)
 			else:
 				self.config.win32_cygwin_open_mintty(title, script, profile)
+		elif terminal in ('wsl', 'wslx', 'ubuntu', 'ubuntux'):
+			if not self.config.win32_detect_win10():
+				die('only supported on windows 10')
+				return -1
+			if not self.config.win32_wsl_locate():
+				die('can not find bash.exe, please install WSL')
+				return -2
+			if terminal in ('wsl', 'ubuntu'):
+				self.config.win32_wsl_open_bash(title, script, profile)
+			else:
+				self.config.win32_wsl_now(title, script, profile)
 		else:
 			die('bad terminal name: %s'%terminal)
 			return -4
@@ -566,7 +768,9 @@ class Terminal (object):
 			terminal = ''
 		if sys.platform[:3] == 'win':
 			if script == None:
-				return ('cmd (default)', 'cygwin', 'mintty', 'cygwinx')
+				names = ['cmd (default)', 'cygwin', 'mintty', 'cygwinx']
+				names += ['wsl (windows subsystem for linux)', 'wslx']
+				return names
 			return self.__win32_open_terminal(terminal, title, script, profile)
 		elif sys.platform == 'cygwin':
 			if script == None:
@@ -605,8 +809,11 @@ class Terminal (object):
 			if terminal in ('', 'system', 'dos', 'win', 'windows', 'command', 'cmd'):
 				script.append(cwd[:2])
 				script.append('cd "%s"'%cwd)
-			else:
+			elif terminal in ('cygwin', 'bash', 'mintty', 'cygwin-mintty', 'cygwinx'):
 				script.append('cd "%s"'%self.config.win2cyg(cwd))
+			else:
+				path = self.config.win2wsl(cwd)
+				script.append('cd "%s"'%path)
 		elif sys.platform == 'cygwin':
 			if terminal in ('dos', 'win', 'cmd', 'command', 'system', 'windows'):
 				path = self.config.cyg2win(os.path.abspath(cwd))
@@ -801,8 +1008,14 @@ if __name__ == '__main__':
 		args = [ 'terminal', '-w', '--terminal=cmd', '--stdin' ]
 		main(args)
 		return 0
+
+	def test4():
+		cfg = configure()
+		# cfg.win32_wsl_now('', ['echo 1234', 'ls -la'])
+		cfg.win32_wsl_open_bash('', ['echo 1234', 'ls -la', 'sleep 3'])
+		# cfg.win32_shell_execute('open', cfg.win32_wsl_locate(), '--login -i -c "sleep 5"')
 	
-	#test2()
+	# test4()
 	main()
 
 
