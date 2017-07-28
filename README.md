@@ -8,7 +8,7 @@ Programming in desktop text editors (atom, gvim, sublime and gedit) always requi
 
 Opening a new terminal window to execute commands in different operating systems is a tricky thing: arguments must be carefully escaped and passed in the correct way, intermediate script (shell script, AppleScript or batch script) must be carefully generated and passed through pipe, and different terminal in all systems must be invoked in different methods.
 
-Therefor, `terminal.py` is created to get these dirty stuff down, in a single script file and provide a unique interface for different operating systems. 
+Therefor, `terminal.py` is created to get these dirty stuff down, in a single script file and provide a unique interface for all operating systems. 
 
 Calling it in your favorite editor to open a new window and execute your programs just like running a command line application in visual studio.
 
