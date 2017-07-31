@@ -38,6 +38,9 @@ class configure (object):
 		self.ShellExecute = None
 		self.kernel32 = None
 		self.textdata = None
+		self.filter = None
+		self.filter_mode = ''
+		self.encoding = None
 	
 	def call (self, args, stdin = None):
 		p = subprocess.Popen(args, shell = False,
@@ -566,10 +569,39 @@ class configure (object):
 		command = [bash]
 		if login:
 			command.append('--login')
-		if sys.stdout.isatty():
-			command.extend(['-i'])
+		if sys.stdout.isatty() and (not self.filter):
+			if not self.encoding:
+				command.extend(['-i'])
 		command.extend(['/tmp/' + filename])
-		subprocess.call(command, shell = False)
+		if (not self.filter) and (not self.encoding):
+			subprocess.call(command, shell = False)
+		else:
+			self.filter_mode = 'cygwin'
+			p = subprocess.Popen(
+					command,
+					shell = False, 
+					stdin = subprocess.PIPE,
+					stderr = subprocess.STDOUT,
+					stdout = subprocess.PIPE)
+			stdout = p.stdout
+			p.stdin.close()
+			while True:
+				text = stdout.readline()
+				if text == '':
+					break
+				if self.encoding:
+					text = text.decode(self.encoding, 'ignore')
+				if self.filter:
+					text = self.filter(text)
+				if not text:
+					continue
+				text = text.rstrip('\r\n\t ')
+				sys.stdout.write(text + '\n')
+				sys.stdout.flush()
+		try:
+			os.remove(tempfile)
+		except:
+			pass
 		return 0
 
 	# open bash of cygwin in a new window and execute script
@@ -642,7 +674,7 @@ class configure (object):
 				t.write('%s\n'%line)
 			t.close()
 			tmpname = t.name
-			if sys.stdout.isatty():
+			if sys.stdout.isatty() and (not self.filter):
 				command = '%s '%bash
 				command += '--login -i "' + self.win2wsl(t.name) + '"'
 				os.system(command)
@@ -656,10 +688,17 @@ class configure (object):
 						stdout = subprocess.PIPE)
 				stdout = p.stdout
 				p.stdin.close()
+				self.filter_mode = 'wsl'
 				while True:
 					text = stdout.readline()
 					if text == '':
 						break
+					if self.encoding:
+						text = text.decode(self.encoding, 'ignore')
+					if self.filter:
+						text = self.filter(text)
+					if not text:
+						continue
 					text = text.rstrip('\n\r')
 					sys.stdout.write(text + '\n')
 					sys.stdout.flush()
@@ -890,6 +929,25 @@ class Terminal (object):
 				os.system('read -n1 -rsp "press any key to continue ..."')
 		return 0
 
+	def set_filter (self, name):
+		if (not name) or name in ('none', 'no', 'null'):
+			self.config.filter = None
+			return 0
+		if name == 'gcc':
+			self.config.filter = self.__filter_auto
+			return 0
+		return 0
+
+	def __filter_auto (self, text):
+		if self.config.filter_mode == 'cygwin':
+			if text.startswith('/cygdrive/') and len(text) >= 12:
+				return text[10] + ':' + text[11:]
+		elif self.config.filter_mode == 'wsl':
+			if text.startswith('/mnt/') and len(text) >= 7:
+				if text[6] == '/':
+					return text[5] + ':' + text[6:]
+		return text
+
 
 
 #----------------------------------------------------------------------
@@ -959,6 +1017,10 @@ def main(argv = None, shellscript = None):
 	if sys.platform[:3] == 'win':
 		parser.add_option('-c', '--cygwin', dest = 'cygwin', default = '',
 				help = 'cygwin home path when using cygwin terminal')
+		parser.add_option('-f', '--filter', dest = 'filter', default = None,
+				help = 'text filter for cygwinx/wslx: none (default), auto')
+		parser.add_option('-n', '--encoding', dest = 'encoding', default = None,
+				help = 'encoding for cygwinx/wslx: none (default), utf-8')
 	opts, _ = parser.parse_args(args)
 	if not opts.cwd:
 		opts.cwd = os.getcwd()
@@ -966,6 +1028,10 @@ def main(argv = None, shellscript = None):
 	if sys.platform[:3] == 'win':
 		cygwin = opts.cygwin
 		terminal.config.cygwin = cygwin
+		if opts.encoding:
+			if not opts.encoding in ('none', 'null', 'no'):
+				terminal.config.encoding = opts.encoding
+		terminal.set_filter(opts.filter)
 	if shellscript:
 		script = [ line for line in shellscript ]
 		if opts.post:
