@@ -561,6 +561,8 @@ class configure (object):
 		tempfile = os.path.join(self.cygwin, 'tmp/' + filename)
 		fp = open(tempfile, 'wb')
 		fp.write('#! /bin/sh\n')
+		if not login:
+			fp.write('export PATH=/usr/local/bin:/usr/bin\n')
 		path = self.win2cyg(os.getcwd())
 		fp.write('cd %s\n'%self.unix_escape(path))
 		for line in script:
@@ -763,7 +765,7 @@ class Terminal (object):
 			if terminal in ('cygwin', 'bash'):
 				self.config.win32_cygwin_open_bash(title, script, profile)
 			elif terminal in ('cygwin-silent', 'cygwin-shell', 'cygwinx'):
-				self.config.win32_cygwin_now(script, True)
+				self.config.win32_cygwin_now(script, False)
 			else:
 				self.config.win32_cygwin_open_mintty(title, script, profile)
 		elif terminal in ('wsl', 'wslx', 'ubuntu', 'ubuntux'):
