@@ -193,11 +193,16 @@ Run WSL Linux commands on Windows
 
 Open a new bash window to run linux commands:
 
-	python terminal --wait -m wsl ls -la
+	python terminal.py --wait -m wsl ls -la
 
 Run linux commands in the current windows shell window:
 
-	python terminal -m wslx ls -la
+	python terminal.py -m wslx ls -la
+
+Run debian and ubuntu1804 via wsl:
+
+    python terminal.py -m wslx -p debian ls -la
+    python terminal.py -m wslx -p ubuntu1804 ls -la
 
 
 Credit
